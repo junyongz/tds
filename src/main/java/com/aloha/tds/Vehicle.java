@@ -2,6 +2,8 @@ package com.aloha.tds;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -10,10 +12,15 @@ import javax.persistence.Table;
 public class Vehicle {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Column(name = "PLATE_NUMBER")
 	private String plateNumber;
+	
+	public Vehicle() {
+		// for JPA
+	}
 
 	public Vehicle(String plateNumber) {
 		this.plateNumber = plateNumber;

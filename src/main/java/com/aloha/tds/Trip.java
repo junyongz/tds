@@ -1,19 +1,30 @@
 package com.aloha.tds;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
+@Entity
 @Table(name = "TDS_TRIP")
 public class Trip {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(name = "TOUR_ID")
 	private Long tourId;
 
 	@ManyToOne
@@ -30,7 +41,12 @@ public class Trip {
 	@Column
 	private Date toDate;
 
-	private Passenger[] passengers;
+	@Transient
+	private Passenger[] passengers = new Passenger[0];
+
+	@OneToMany(cascade = CascadeType.ALL)
+	@JoinColumn(name = "TRIP_ID")
+	private Set<TripPassenger> tripPassengers;
 
 	@ManyToOne
 	@JoinColumn(name = "VEHICLE_ID")
@@ -39,6 +55,10 @@ public class Trip {
 	@ManyToOne
 	@JoinColumn(name = "DRIVER_ID")
 	private Driver driver;
+	
+	public Trip() {
+		// for JPA
+	}
 
 	Trip(Place fromPlace, Date fromDate, Place toPlace, Date toDate, Passenger... passengers) {
 		this.fromPlace = fromPlace;
@@ -46,10 +66,19 @@ public class Trip {
 		this.toPlace = toPlace;
 		this.toDate = toDate;
 		this.passengers = passengers;
+		prepareTripPassengers();
 	}
 
 	public static TripBuilder startFrom(Place fromPlace, Date fromDate) {
 		return new TripBuilder(fromPlace, fromDate);
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public Place getFromPlace() {
@@ -87,17 +116,42 @@ public class Trip {
 	public Passenger[] getPassengers() {
 		return passengers;
 	}
+	
+	public void addPassenger(Passenger passenger) {
+		System.arraycopy(new Passenger[] { passenger }, 0, this.passengers, this.passengers.length - 1, 1);
+		this.tripPassengers.add(new TripPassenger(this, passenger));
+	}
 
-	public void setPassengers(Passenger[] passengers) {
-		this.passengers = passengers;
+	public Long getTourId() {
+		return tourId;
+	}
+
+	public void setTourId(Long tourId) {
+		this.tourId = tourId;
 	}
 
 	public Vehicle getVehicle() {
 		return vehicle;
 	}
 
+	public void setVehicle(Vehicle vehicle) {
+		this.vehicle = vehicle;
+	}
+
 	public Driver getDriver() {
 		return driver;
+	}
+
+	public void setDriver(Driver driver) {
+		this.driver = driver;
+	}
+
+	public Set<TripPassenger> getTripPassengers() {
+		return tripPassengers;
+	}
+
+	public void setTripPassengers(Set<TripPassenger> tripPassengers) {
+		this.tripPassengers = tripPassengers;
 	}
 
 	void arrangeVehicleWithDriver(Vehicle vehicle, Driver driver) {
@@ -110,6 +164,13 @@ public class Trip {
 		this.driver = null;
 	}
 
+	private void prepareTripPassengers() {
+		this.tripPassengers = new HashSet<>();
+		for (Passenger passenger : this.passengers) {
+			this.tripPassengers.add(new TripPassenger(this, passenger));
+		}
+	}
+
 	static class TripBuilder {
 		private Place fromPlace;
 
@@ -119,7 +180,7 @@ public class Trip {
 
 		private Date toDate;
 
-		private Passenger[] passengers;
+		private Passenger[] passengers = new Passenger[0];
 
 		public TripBuilder(Place fromPlace, Date fromDate) {
 			this.fromPlace = fromPlace;

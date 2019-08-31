@@ -7,17 +7,22 @@ import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
-import org.springframework.data.annotation.Transient;
 import org.springframework.util.ObjectUtils;
 
 @Entity
-@Table
+@Table(name = "TDS_TOUR")
 public class Tour {
 
-	@Id 
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Transient
@@ -32,18 +37,16 @@ public class Tour {
 	@Column
 	private boolean cancelled = false;
 
-	@Transient
+	@ManyToOne
+	@JoinColumn(name = "CUSTOMER_ID")
 	private Customer customer;
-	
-	@Column
-	private Long customerId;
 
 	@Transient
 	private TourDispatcher tourDispatcher;
-	
+
 	public Tour() {
 	}
-	
+
 	private Tour(Customer customer) {
 		this(customer, null);
 	}
@@ -51,13 +54,12 @@ public class Tour {
 	Tour(Customer customer, TourDispatcher tourDispatcher) {
 		this.customer = customer;
 		this.tourDispatcher = tourDispatcher;
-		this.customerId = customer.getId();
 	}
-	
+
 	void usingDispatcher(TourDispatcher tourDispatcher) {
 		this.tourDispatcher = tourDispatcher;
 	}
-	
+
 	public static Tour ofCustomer(Customer customer) {
 		return new Tour(customer);
 	}
@@ -105,6 +107,10 @@ public class Tour {
 
 	public boolean isCancelled() {
 		return cancelled;
+	}
+
+	List<Trip> getAllTrips() {
+		return trips;
 	}
 
 	/**

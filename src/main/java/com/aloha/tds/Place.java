@@ -2,6 +2,8 @@ package com.aloha.tds;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -10,6 +12,7 @@ import javax.persistence.Table;
 public class Place {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Column
@@ -17,6 +20,10 @@ public class Place {
 
 	@Column
 	private String city;
+	
+	public Place() {
+		// for JPA
+	}
 
 	public Place(String country, String city) {
 		this.country = country;

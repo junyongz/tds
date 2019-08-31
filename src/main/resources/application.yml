@@ -1,0 +1,35 @@
+spring:
+  profiles: default, dev, test
+
+  datasource:
+    url: jdbc:h2:file:~/Projects/data/h2-tds
+    driverClassName: org.h2.Driver
+    username: tester
+    password: tester
+    
+  jpa:
+    properties:
+      dialect: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+      
+  h2:
+    console:
+      enabled: true
+
+---
+
+spring:
+  profiles: staging
+    
+  datasource:
+    url: jdbc:mysql://localhost:33060/tds
+    driverClassName: com.mysql.cj.jdbc.Driver
+    username: tds
+    password: 
+    
+  jpa:
+    properties:
+      dialect: org.hibernate.dialect.MySqlDialect
+    hibernate:
+      ddl-auto: update

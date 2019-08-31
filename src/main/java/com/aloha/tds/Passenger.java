@@ -2,6 +2,8 @@ package com.aloha.tds;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
@@ -10,10 +12,15 @@ import javax.persistence.Table;
 public class Passenger {
 
 	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Column(name = "FULL_NAME")
 	private String fullName;
+	
+	public Passenger() {
+		// for JPA
+	}
 
 	public Passenger(String fullName) {
 		this.fullName = fullName;

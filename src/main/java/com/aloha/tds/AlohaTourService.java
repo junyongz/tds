@@ -1,45 +1,58 @@
 package com.aloha.tds;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.aloha.tds.persistent.TourRepository;
+import com.aloha.tds.persistent.TripRepository;
+
+@Service
+@Transactional
 public class AlohaTourService extends AbstractTourService {
 
-	private List<Tour> tours = new ArrayList<>();
-	
+	private final TourRepository tourRepository;
+
+	private final TripRepository tripRepository;
+
+	@Autowired
+	public AlohaTourService(TourRepository tourRepository, TripRepository tripRepository) {
+		this.tourRepository = tourRepository;
+		this.tripRepository = tripRepository;
+	}
+
 	@Override
 	protected void doPostAddTour(Tour tour) {
 	}
-	
+
 	@Override
 	protected void doPreAddTour(Tour tour) {
-		this.tours.add(tour);
+		this.tourRepository.save(tour);
+		this.tripRepository.saveAll(tour.getAllTrips());
 	}
 
 	@Override
 	public long countTours() {
-		return tours.size();
+		return tourRepository.count();
 	}
 
 	@Override
 	public List<Tour> toursByCustomer(Customer customer) {
-		List<Tour> designated = new ArrayList<>();
-		for (Tour tour: this.tours) {
-			if (tour.customer().equals(customer)) {
-				designated.add(tour);
-			}
-		}
-		return designated;
+		return this.tourRepository.findByCustomerId(customer.getId());
 	}
 
 	@Override
 	public boolean arrangedVehicle(Vehicle vehicle, Date fromDate, Date toDate) {
-		for (Tour tour : this.tours) {
-			if (tour.arrangedVehicle(vehicle, fromDate, toDate)) {
-				return true;
-			}
-		}
-		return false;
+		return this.tripRepository.countByVehicleArrangedForDates(vehicle.getId(), fromDate, toDate) > 0;
+	}
+
+	@Override
+	public void arrangeVehicleWithDriver(Tour tour, Vehicle vehicle, Driver driver) throws VehicleNotAvailableException {
+		tour.arrangeVehicleWithDriver(vehicle, driver);
+		this.tourRepository.save(tour);
+		this.tripRepository.saveAll(tour.getAllTrips());
 	}
 }

@@ -128,23 +128,6 @@ public class Tour {
 		this.arranged = true;
 	}
 
-	// TODO: method visibility rethink
-	boolean arrangedVehicle(Vehicle vehicle, Date fromDate, Date toDate) {
-		for (Trip trip : this.trips) {
-			if (trip.getVehicle() == null) {
-				continue;
-			}
-
-			if (ObjectUtils.nullSafeEquals(trip.getVehicle().getPlateNumber(), vehicle.getPlateNumber())) {
-				// (StartA <= EndB) and (EndA >= StartB)
-				if (trip.getFromDate().compareTo(toDate) <= 0 && trip.getToDate().compareTo(fromDate) >= 0) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
 	public void arrangeVehicleWithDriver(Trip trip, Vehicle vehicle, Driver driver)
 			throws VehicleNotAvailableException {
 		tourDispatcher.checkVehicleAvailability(vehicle, trip.getFromDate(), trip.getToDate());

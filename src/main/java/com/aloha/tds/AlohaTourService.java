@@ -45,7 +45,7 @@ public class AlohaTourService extends AbstractTourService {
 	}
 
 	@Override
-	public boolean arrangedVehicle(Vehicle vehicle, Date fromDate, Date toDate) {
+	public boolean vehicleArrangedForDates(Vehicle vehicle, Date fromDate, Date toDate) {
 		return this.tripRepository.countByVehicleArrangedForDates(vehicle.getId(), fromDate, toDate) > 0;
 	}
 

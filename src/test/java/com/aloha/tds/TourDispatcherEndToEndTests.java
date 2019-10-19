@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import com.aloha.tds.persistent.CustomerRepository;
 import com.aloha.tds.persistent.DriverRepository;
@@ -300,6 +299,26 @@ public class TourDispatcherEndToEndTests {
 		dispatcher.checkVehicleAvailability(starex, fromDateTime, toDateTime);
 	}
 
+	@Test
+	public void changeTimeForTrip() {
+		
+	}
+	
+	@Test
+	public void changeTimeForTripThatClashWithOtherTrip() {
+		
+	}
+	
+	@Test
+	public void changeVehicleForTrip() {
+		
+	}
+	
+	@Test
+	public void changeVehicleForTripButNotAvailable() {
+		
+	}
+	
 	@Test
 	public void tourLibrary() {
 		TourService tourService = new AlohaTourService(tourRepository, tripRepository);

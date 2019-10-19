@@ -25,7 +25,7 @@ public class AlohaTourDispatcher implements TourDispatcher {
 	@Override
 	public void checkVehicleAvailability(Vehicle vehicle, Date fromDate, Date toDate)
 			throws VehicleNotAvailableException {
-		if (tourService.arrangedVehicle(vehicle, fromDate, toDate)) {
+		if (tourService.vehicleArrangedForDates(vehicle, fromDate, toDate)) {
 			throw new VehicleNotAvailableException(vehicle);
 		}
 	}

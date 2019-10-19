@@ -18,5 +18,7 @@ public interface TourService {
 	 * @param toDate to this date
 	 * @return whether the vehicle is arranged for any tour for the given time frame.
 	 */
-	boolean arrangedVehicle(Vehicle vehicle, Date fromDate, Date toDate);
+	boolean vehicleArrangedForDates(Vehicle vehicle, Date fromDate, Date toDate);
+
+	void arrangeVehicleWithDriver(Tour tour, Vehicle starex, Driver driver) throws VehicleNotAvailableException;
 }

@@ -168,6 +168,10 @@ public class Trip {
 	private void prepareTripPassengers() {
 		this.tripPassengers = new HashSet<>();
 		for (Passenger passenger : this.passengers) {
+			if (passenger.getId() == null) {
+				throw new IllegalArgumentException("should have saved passenger records first");
+			}
+
 			this.tripPassengers.add(new TripPassenger(this, passenger));
 		}
 	}

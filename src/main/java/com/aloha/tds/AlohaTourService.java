@@ -55,4 +55,13 @@ public class AlohaTourService extends AbstractTourService {
 		this.tourRepository.save(tour);
 		this.tripRepository.saveAll(tour.getAllTrips());
 	}
+
+	@Override
+	public void arrangeVehicleWithDriverForTrip(Trip trip, Vehicle vehicle, Driver driver)
+			throws VehicleNotAvailableException {
+		if (this.tripRepository.countByVehicleArrangedForDates(vehicle.getId(), trip.getFromDate(), trip.getToDate()) > 0) {
+			throw new VehicleNotAvailableException(vehicle);
+		}
+		trip.arrangeVehicleWithDriver(vehicle, driver);
+	}
 }

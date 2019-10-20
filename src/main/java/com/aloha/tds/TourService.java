@@ -20,5 +20,8 @@ public interface TourService {
 	 */
 	boolean vehicleArrangedForDates(Vehicle vehicle, Date fromDate, Date toDate);
 
-	void arrangeVehicleWithDriver(Tour tour, Vehicle starex, Driver driver) throws VehicleNotAvailableException;
+	void arrangeVehicleWithDriver(Tour tour, Vehicle vehicle, Driver driver) throws VehicleNotAvailableException;
+
+	void arrangeVehicleWithDriverForTrip(Trip trip, Vehicle vehicle, Driver driver)
+			throws VehicleNotAvailableException;
 }

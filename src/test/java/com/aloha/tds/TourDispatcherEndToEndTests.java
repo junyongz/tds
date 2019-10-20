@@ -75,6 +75,7 @@ public class TourDispatcherEndToEndTests {
 
 		Passenger passengerA = new Passenger("Puppa");
 		Passenger passengerB = new Passenger("Flower");
+		passengerRepository.saveAll(Arrays.asList(passengerA, passengerB));
 
 		Trip singleTrip = new Trip(fromPlace, fromDateTime, toPlace, toDateTime, passengerA, passengerB);
 
@@ -97,6 +98,7 @@ public class TourDispatcherEndToEndTests {
 
 		Passenger passengerA = new Passenger("Puppa");
 		Passenger passengerB = new Passenger("Flower");
+		passengerRepository.saveAll(Arrays.asList(passengerA, passengerB));
 
 		Place fromPlace = new Place("Singapore", "Bukit Batok");
 		Date fromDateTime = new Date();
@@ -144,6 +146,7 @@ public class TourDispatcherEndToEndTests {
 
 		Passenger passengerA = new Passenger("Puppa");
 		Passenger passengerB = new Passenger("Flower");
+		passengerRepository.saveAll(Arrays.asList(passengerA, passengerB));
 
 		Trip singleTrip = new Trip(fromPlace, fromDateTime, toPlace, toDateTime, passengerA, passengerB);
 
@@ -204,6 +207,7 @@ public class TourDispatcherEndToEndTests {
 		Tour anotherTour = dispatcher.newBooking(cust2);
 
 		Passenger passengerC = new Passenger("Nono");
+		this.passengerRepository.save(passengerC);
 
 		Trip trip2 = Trip.startFrom(fromPlace, fromDateTime).to(toPlace, toDateTime).passengers(passengerC, passengerB)
 				.done();
@@ -223,6 +227,7 @@ public class TourDispatcherEndToEndTests {
 
 		Passenger passengerA = new Passenger("Puppa");
 		Passenger passengerB = new Passenger("Flower");
+		passengerRepository.saveAll(Arrays.asList(passengerA, passengerB));
 
 		Place fromPlace = new Place("Singapore", "Bukit Batok");
 		Date fromDateTime = DateTimeUtils.fromDateTime(2019, 6, 28, 9, 30);
@@ -273,6 +278,7 @@ public class TourDispatcherEndToEndTests {
 
 		Passenger passengerA = new Passenger("Puppa");
 		Passenger passengerB = new Passenger("Flower");
+		passengerRepository.saveAll(Arrays.asList(passengerA, passengerB));
 
 		Trip singleTrip = new Trip(fromPlace, fromDateTime, toPlace, toDateTime, passengerA, passengerB);
 
@@ -308,6 +314,7 @@ public class TourDispatcherEndToEndTests {
 
 		Passenger passengerA = new Passenger("Puppa");
 		Passenger passengerB = new Passenger("Flower");
+		passengerRepository.saveAll(Arrays.asList(passengerA, passengerB));
 
 		try {
 			new Trip(fromPlace, toDateTime, toPlace, fromDateTime, passengerA, passengerB);
@@ -329,6 +336,7 @@ public class TourDispatcherEndToEndTests {
 
 		Passenger passengerA = new Passenger("Puppa");
 		Passenger passengerB = new Passenger("Flower");
+		passengerRepository.saveAll(Arrays.asList(passengerA, passengerB));
 
 		Trip singleTrip = new Trip(fromPlace, fromDateTime, toPlace, toDateTime, passengerA, passengerB);
 
@@ -365,6 +373,7 @@ public class TourDispatcherEndToEndTests {
 
 		Passenger passengerA = new Passenger("Puppa");
 		Passenger passengerB = new Passenger("Flower");
+		passengerRepository.saveAll(Arrays.asList(passengerA, passengerB));
 
 		Trip firstTrip = new Trip(fromPlace, fromDateTime, toPlace, toDateTime, passengerA, passengerB);
 		
@@ -396,12 +405,108 @@ public class TourDispatcherEndToEndTests {
 
 	@Test
 	public void changeVehicleForTrip() {
+		TourService tourService = new AlohaTourService(tourRepository, tripRepository);
 
+		Place fromPlace = newPlace("Singapore", "Bukit Batok");
+		Date fromDateTime = DateTimeUtils.fromDateTime(2018, 9, 14, 9, 30);
+		Place toPlace = newPlace("Malaysia", "Genting");
+		Date toDateTime = DateTimeUtils.fromDateTime(2018, 9, 14, 22, 30);
+
+		Passenger passengerA = new Passenger("Puppa");
+		Passenger passengerB = new Passenger("Flower");
+		passengerRepository.saveAll(Arrays.asList(passengerA, passengerB));
+
+		Trip firstTrip = new Trip(fromPlace, fromDateTime, toPlace, toDateTime, passengerA, passengerB);
+		
+		Trip nextTrip = new Trip(toPlace, DateTimeUtils.fromDateTime(2018, 9, 15, 9, 30), fromPlace,
+				DateTimeUtils.fromDateTime(2018, 9, 15, 22, 30), passengerA, passengerB);
+
+		TourDispatcher dispatcher = new AlohaTourDispatcher(tourService);
+		assertThat(dispatcher.tourCount(), is(0l));
+
+		Customer cust1 = newCustomer("Alice Tan");
+		Tour tour = dispatcher.newBooking(cust1);
+		tour.bookTrips(firstTrip, nextTrip);
+
+		Vehicle starex = new Vehicle("JJ 9981");
+		Driver driver = new Driver("Daniel");
+		
+		vehicleRepository.save(starex);
+		driverRepository.save(driver);
+		
+		tourService.arrangeVehicleWithDriver(tour, starex, driver);
+		
+		Vehicle anotherCar = new Vehicle("JJ 9982");
+		Driver anotherDriver = new Driver("Kong");
+		
+		vehicleRepository.save(anotherCar);
+		driverRepository.save(anotherDriver);
+		
+		tourService.arrangeVehicleWithDriverForTrip(nextTrip, anotherCar, anotherDriver);
 	}
 
 	@Test
 	public void changeVehicleForTripButNotAvailable() {
+		TourService tourService = new AlohaTourService(tourRepository, tripRepository);
 
+		Place fromPlace = newPlace("Singapore", "Bukit Batok");
+		Date fromDateTime = DateTimeUtils.fromDateTime(2018, 9, 14, 9, 30);
+		Place toPlace = newPlace("Malaysia", "Genting");
+		Date toDateTime = DateTimeUtils.fromDateTime(2018, 9, 14, 22, 30);
+
+		Passenger passengerA = new Passenger("Puppa");
+		Passenger passengerB = new Passenger("Flower");
+		passengerRepository.saveAll(Arrays.asList(passengerA, passengerB));
+
+		Trip firstTrip = new Trip(fromPlace, fromDateTime, toPlace, toDateTime, passengerA, passengerB);
+		
+		Trip nextTrip = new Trip(toPlace, DateTimeUtils.fromDateTime(2018, 9, 15, 9, 30), fromPlace,
+				DateTimeUtils.fromDateTime(2018, 9, 15, 22, 30), passengerA, passengerB);
+
+		TourDispatcher dispatcher = new AlohaTourDispatcher(tourService);
+		assertThat(dispatcher.tourCount(), is(0l));
+
+		Customer cust1 = newCustomer("Alice Tan");
+		Tour tour = dispatcher.newBooking(cust1);
+		tour.bookTrips(firstTrip, nextTrip);
+
+		Vehicle starex = new Vehicle("JJ 9981");
+		Driver driver = new Driver("Daniel");
+		
+		vehicleRepository.save(starex);
+		driverRepository.save(driver);
+		
+		tourService.arrangeVehicleWithDriver(tour, starex, driver);
+		
+		// use JJ 9982 for a new tour
+		
+		Vehicle anotherCar = new Vehicle("JJ 9982");
+		Driver anotherDriver = new Driver("Kong");
+		
+		vehicleRepository.save(anotherCar);
+		driverRepository.save(anotherDriver);
+		
+		Passenger passengerC = new Passenger("Book Worm");
+		passengerRepository.save(passengerC);
+		
+		Customer cust2 = newCustomer("Bobby Lim");
+		Tour anotherTour = dispatcher.newBooking(cust2);
+		anotherTour.bookSingleTrip(new Trip(newPlace("Malaysia", "Kluang"), 
+				DateTimeUtils.fromDateTime(2018, 9, 15, 9, 30),
+				newPlace("Malaysia", "Kuantan"), 
+				DateTimeUtils.fromDateTime(2018, 9, 15, 20, 30), 
+				passengerC));
+		
+		tourService.arrangeVehicleWithDriver(anotherTour, anotherCar, anotherDriver);
+
+		// then arrange the same car for earlier trip
+		try {
+			tourService.arrangeVehicleWithDriverForTrip(nextTrip, anotherCar, anotherDriver);
+			fail("should throw VehicleNotAvailableException");
+		}
+		catch (VehicleNotAvailableException ex) {
+			assertThat(ex.getVehicle().getPlateNumber(), is("JJ 9982"));
+		}
 	}
 
 	@Test
@@ -415,6 +520,7 @@ public class TourDispatcherEndToEndTests {
 
 		Passenger passengerA = new Passenger("Puppa");
 		Passenger passengerB = new Passenger("Flower");
+		passengerRepository.saveAll(Arrays.asList(passengerA, passengerB));
 
 		Trip singleTrip = new Trip(fromPlace, fromDateTime, toPlace, toDateTime, passengerA, passengerB);
 
@@ -439,6 +545,8 @@ public class TourDispatcherEndToEndTests {
 		assertThat(tours.size(), is(2));
 		tours = tourLibrary.toursByCustomer(cust2);
 		assertThat(tours.size(), is(1));
+		
+		assertThat(this.passengerRepository.count(), is(2l));
 	}
 
 	private Customer newCustomer(String customerName) {

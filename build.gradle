@@ -5,6 +5,7 @@ plugins {
 
 apply plugin: 'eclipse'
 apply plugin: 'io.spring.dependency-management'
+apply plugin: 'jacoco'
 
 group = 'com.aloha'
 version = '1.0.0-SNAPSHOT'
@@ -37,3 +38,12 @@ dependencies {
 	testImplementation 'com.h2database:h2'
 	testImplementation 'org.hamcrest:hamcrest-core'
 }
+
+jacocoTestReport {
+    reports {
+        xml.enabled true
+        html.enabled true
+    }
+}
+
+check.dependsOn jacocoTestReport

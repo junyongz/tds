@@ -66,6 +66,7 @@ public class Trip {
 		this.toPlace = toPlace;
 		this.toDate = toDate;
 		this.passengers = passengers;
+		checkTiming();
 		prepareTripPassengers();
 	}
 
@@ -168,6 +169,12 @@ public class Trip {
 		this.tripPassengers = new HashSet<>();
 		for (Passenger passenger : this.passengers) {
 			this.tripPassengers.add(new TripPassenger(this, passenger));
+		}
+	}
+	
+	private void checkTiming() {
+		if (this.toDate.before(fromDate)) {
+			throw new IllegalArgumentException("from date shouldn't after to date");
 		}
 	}
 

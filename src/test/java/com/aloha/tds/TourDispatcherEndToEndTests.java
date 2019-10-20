@@ -26,7 +26,7 @@ import com.aloha.tds.persistent.VehicleRepository;
 import com.aloha.tds.util.DateTimeUtils;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(properties = "spring.datasource.url=jdbc:h2:mem:tds")
+@SpringBootTest("spring.datasource.url=jdbc:h2:mem:tds")
 public class TourDispatcherEndToEndTests {
 
 	@Autowired
@@ -46,13 +46,13 @@ public class TourDispatcherEndToEndTests {
 
 	@Autowired
 	private DriverRepository driverRepository;
-	
+
 	@Autowired
 	private PassengerRepository passengerRepository;
 
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
-	
+
 	@Before
 	public void beforeTest() {
 		this.tourRepository.deleteAll();
@@ -300,25 +300,110 @@ public class TourDispatcherEndToEndTests {
 	}
 
 	@Test
-	public void changeTimeForTrip() {
-		
+	public void timeNotMakingSenseForTrip() {
+		Place fromPlace = new Place("Singapore", "Bukit Batok");
+		Date fromDateTime = DateTimeUtils.fromDateTime(2018, 9, 14, 9, 30);
+		Place toPlace = new Place("Malaysia", "Genting");
+		Date toDateTime = DateTimeUtils.fromDateTime(2018, 9, 14, 22, 30);
+
+		Passenger passengerA = new Passenger("Puppa");
+		Passenger passengerB = new Passenger("Flower");
+
+		try {
+			new Trip(fromPlace, toDateTime, toPlace, fromDateTime, passengerA, passengerB);
+			fail("should have thrown IllegalArgumentException");
+		}
+		catch (IllegalArgumentException ex) {
+			// ok
+		}
 	}
-	
+
+	@Test
+	public void changeTimeForTrip() {
+		TourService tourService = new AlohaTourService(tourRepository, tripRepository);
+
+		Place fromPlace = new Place("Singapore", "Bukit Batok");
+		Date fromDateTime = DateTimeUtils.fromDateTime(2018, 9, 14, 9, 30);
+		Place toPlace = new Place("Malaysia", "Genting");
+		Date toDateTime = DateTimeUtils.fromDateTime(2018, 9, 14, 22, 30);
+
+		Passenger passengerA = new Passenger("Puppa");
+		Passenger passengerB = new Passenger("Flower");
+
+		Trip singleTrip = new Trip(fromPlace, fromDateTime, toPlace, toDateTime, passengerA, passengerB);
+
+		TourDispatcher dispatcher = new AlohaTourDispatcher(tourService);
+		assertThat(dispatcher.tourCount(), is(0l));
+
+		Customer cust1 = newCustomer("Alice Tan");
+		Tour tour = dispatcher.newBooking(cust1);
+		tour.bookSingleTrip(singleTrip);
+
+		Vehicle starex = new Vehicle("JJ 9981");
+		Driver driver = new Driver("Daniel");
+		
+		Date newFromDate = DateTimeUtils.fromDateTime(2018, 9, 15, 9, 30);
+		Date newToDate = DateTimeUtils.fromDateTime(2018, 9, 15, 20, 30);
+
+		tour.arrangeVehicleWithDriver(starex, driver);
+		tour.changeTimeForTrip(singleTrip, newFromDate, newToDate);
+		
+		assertThat(singleTrip.getFromDate(), is(newFromDate));
+		assertThat(singleTrip.getToDate(), is(newToDate));
+
+		assertThat(dispatcher.tourCount(), is(1l));
+	}
+
 	@Test
 	public void changeTimeForTripThatClashWithOtherTrip() {
+		TourService tourService = new AlohaTourService(tourRepository, tripRepository);
+
+		Place fromPlace = new Place("Singapore", "Bukit Batok");
+		Date fromDateTime = DateTimeUtils.fromDateTime(2018, 9, 14, 9, 30);
+		Place toPlace = new Place("Malaysia", "Genting");
+		Date toDateTime = DateTimeUtils.fromDateTime(2018, 9, 14, 22, 30);
+
+		Passenger passengerA = new Passenger("Puppa");
+		Passenger passengerB = new Passenger("Flower");
+
+		Trip firstTrip = new Trip(fromPlace, fromDateTime, toPlace, toDateTime, passengerA, passengerB);
 		
+		Trip nextTrip = new Trip(toPlace, DateTimeUtils.fromDateTime(2018, 9, 15, 9, 30), fromPlace,
+				DateTimeUtils.fromDateTime(2018, 9, 15, 22, 30), passengerA, passengerB);
+
+		TourDispatcher dispatcher = new AlohaTourDispatcher(tourService);
+		assertThat(dispatcher.tourCount(), is(0l));
+
+		Customer cust1 = newCustomer("Alice Tan");
+		Tour tour = dispatcher.newBooking(cust1);
+		tour.bookTrips(firstTrip, nextTrip);
+
+		Vehicle starex = new Vehicle("JJ 9981");
+		Driver driver = new Driver("Daniel");
+
+		tour.arrangeVehicleWithDriver(starex, driver);
+		try {
+			tour.changeTimeForTrip(firstTrip, DateTimeUtils.fromDateTime(2018, 9, 15, 9, 30),
+				DateTimeUtils.fromDateTime(2018, 9, 15, 20, 30));
+			fail("should have thrown time clash exception");
+		}
+		catch (TimeClashException ex) {
+			// ok
+			assertThat(ex.clashingTrip(), is(firstTrip));
+			assertThat(ex.clashWith(), is(nextTrip));
+		}
 	}
-	
+
 	@Test
 	public void changeVehicleForTrip() {
-		
+
 	}
-	
+
 	@Test
 	public void changeVehicleForTripButNotAvailable() {
-		
+
 	}
-	
+
 	@Test
 	public void tourLibrary() {
 		TourService tourService = new AlohaTourService(tourRepository, tripRepository);

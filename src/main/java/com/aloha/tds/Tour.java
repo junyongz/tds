@@ -15,7 +15,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.springframework.util.ObjectUtils;
+import com.aloha.tds.util.DateTimeUtils;
 
 @Entity
 @Table(name = "TDS_TOUR")
@@ -133,6 +133,19 @@ public class Tour {
 		tourDispatcher.checkVehicleAvailability(vehicle, trip.getFromDate(), trip.getToDate());
 		trip.arrangeVehicleWithDriver(vehicle, driver);
 		checkIfAllTripsArranged();
+	}
+	
+	public void changeTimeForTrip(Trip targetedTrip, Date newFromDate, Date newToDate) {
+		for (Trip trip : this.trips) {
+			if (!trip.equals(targetedTrip)) {
+				// (StartA <= EndB) and (EndA >= StartB)
+ 				if (DateTimeUtils.isTimeClashed(trip.getFromDate(), trip.getToDate(), newFromDate, newToDate)) {
+ 					throw new TimeClashException(targetedTrip, trip);
+ 				}
+			}
+		}
+		targetedTrip.setFromDate(newFromDate);
+		targetedTrip.setToDate(newToDate);
 	}
 
 	private void checkIfAllTripsArranged() {
